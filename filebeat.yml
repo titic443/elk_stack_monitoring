@@ -3,7 +3,9 @@ filebeat.inputs:
 - type: filestream
   id: docker-logs
   paths:
-    - /var/lib/docker/containers/*/89fa07808b8a*-json.log  # Read all container logs
+    - /var/lib/docker/containers/*/d7c308b53c4c*-json.log 
+    - /var/lib/docker/containers/*/95293a085ed3*-json.log 
+
   # json.keys_under_root: true
   # json.add_error_key: true
   # json.message_key: log
@@ -36,7 +38,36 @@ filebeat.inputs:
 #         - equals:
 #             container.id: "25e95dbda70c"
 
+# filebeat.autodiscover:
+#   providers:
+#     - type: docker
+#       templates:
+#         - condition:
+#             contains:
+#               docker.container.image: "titich/go_line"
+          # config:
+          #   - type: docker
+          #     containers.ids:
+          #       - "${data.docker.container.id}"
+          #     fields_under_root: true
+          #     processors:
+          #       - decode_json_fields:
+          #           fields: ["message"]  # Specify the field containing JSON logs
+          #           target: "json"       # Store the decoded JSON in a field named "json"
+          #           overwrite_keys: true # Overwrite existing keys if necessary
+          #     multiline:
+          #       negate: true
+          #       pattern: '^\d{2}.\d{2}.\d{4} \d{2}:\d{2}:\d{2}.\d{3}'
+          #       match: after
 
 output.logstash:
   hosts: 'logstash01:5044'
+
+# output.elasticsearch:
+#   hosts: ${ELASTIC_HOSTS}
+#   username: ${ELASTIC_USER}
+#   password: ${ELASTIC_PASSWORD}
+#   ssl:
+#     enabled: true
+#     certificate_authorities: ${CA_CERT}
 
