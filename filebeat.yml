@@ -1,26 +1,42 @@
+
 filebeat.inputs:
 - type: filestream
-  id: default-filestream
+  id: docker-logs
   paths:
-    - ingest_data/*.log
+    - /var/lib/docker/containers/*/89fa07808b8a*-json.log  # Read all container logs
+  # json.keys_under_root: true
+  # json.add_error_key: true
+  # json.message_key: log
 
-filebeat.autodiscover:
-  providers:
-    - type: docker
-      hints.enabled: true
+# processors:
+#   - decode_json_fields:
+#       fields: ["original", "message"]
+#       process_array: false
+#       max_depth: 1
+#       target: ""
+#       overwrite_keys: false
+#       add_error_key: true
 
-processors:
-- add_docker_metadata: ~
 
-setup.kibana:
-  host: ${KIBANA_HOSTS}
-  username: ${ELASTIC_USER}
-  password: ${ELASTIC_PASSWORD} 
+# - drop_event:
+#     when:
+#       or:  # Exclude if any condition in this list is true
+#         - equals:
+#             container.id: "2808bd49f47f"
+#         - equals:
+#             container.id: "7eb66de8b68a"
+#         - equals:
+#             container.id: "dae654e7c137"
+#         - equals:
+#             container.id: "88888c346be7"
+#         - equals:
+#             container.id: "15064013fdd9"
+#         - equals:
+#             container.id: "3210c9e27ce9"
+#         - equals:
+#             container.id: "25e95dbda70c"
 
-output.elasticsearch:
-  hosts: ${ELASTIC_HOSTS}
-  username: ${ELASTIC_USER}
-  password: ${ELASTIC_PASSWORD}
-  ssl:
-    enabled: true
-    certificate_authorities: ${CA_CERT}
+
+output.logstash:
+  hosts: 'logstash01:5044'
+

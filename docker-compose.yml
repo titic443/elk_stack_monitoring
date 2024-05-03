@@ -277,14 +277,14 @@ services:
       - KIBANA_FLEET_PASSWORD=${ELASTIC_PASSWORD}
       - KIBANA_HOST=https://kibana:5601
 
-  webapp:
-    build:
-      context: app
-    volumes:
-      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
-      - "/proc:/hostfs/proc:ro"
-      - "/:/hostfs:ro"
-    ports:
-      - 8000:8000
+#   webapp:
+#     build:
+#       context: app
+#     volumes:
+#       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+#       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#       - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+#       - "/proc:/hostfs/proc:ro"
+#       - "/:/hostfs:ro"
+#     ports:
+#       - 8000:8000
