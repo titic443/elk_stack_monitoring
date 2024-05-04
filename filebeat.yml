@@ -1,42 +1,29 @@
 
-filebeat.inputs:
-- type: filestream
-  id: docker-logs
-  paths:
-    - /var/lib/docker/containers/*/d7c308b53c4c*-json.log 
-    - /var/lib/docker/containers/*/95293a085ed3*-json.log 
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
 
-  # json.keys_under_root: true
-  # json.add_error_key: true
-  # json.message_key: log
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
 
-# processors:
-#   - decode_json_fields:
-#       fields: ["original", "message"]
-#       process_array: false
-#       max_depth: 1
-#       target: ""
-#       overwrite_keys: false
-#       add_error_key: true
+processors:
+  - drop_event.when.contains.container.image.name: docker.elastic.co/kibana/kibana:8.8.2
+  # - drop_event.when.contains.container.image.name: docker.elastic.co/beats/elastic-agent
+  - drop_event.when.contains.container.image.name: docker.elastic.co/beats/filebeat
+  - drop_event.when.contains.container.image.name: docker.elastic.co/beats/metricbeat
+  - drop_event.when.contains.container.image.name: docker.elastic.co/logstash/logstash
+  - drop_event.when.contains.container.image.name: docker.elastic.co/elasticsearch/elasticsearch
+  - drop_event.when.contains.container.image.name: rabbit
 
+# filebeat.inputs:
+# - type: filestream
+#   id: docker-logs
+#   paths:
+#     - /var/lib/docker/containers/*/*-json.log
 
-# - drop_event:
-#     when:
-#       or:  # Exclude if any condition in this list is true
-#         - equals:
-#             container.id: "2808bd49f47f"
-#         - equals:
-#             container.id: "7eb66de8b68a"
-#         - equals:
-#             container.id: "dae654e7c137"
-#         - equals:
-#             container.id: "88888c346be7"
-#         - equals:
-#             container.id: "15064013fdd9"
-#         - equals:
-#             container.id: "3210c9e27ce9"
-#         - equals:
-#             container.id: "25e95dbda70c"
 
 # filebeat.autodiscover:
 #   providers:
