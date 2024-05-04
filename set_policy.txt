@@ -1,0 +1,22 @@
+
+#Get details index template
+GET /_index_template/connections_template
+
+#Create index template
+PUT /_index_template/connection_template
+{
+  "index_patterns": ["connection*"]
+}
+
+
+#Create index template
+PUT /_index_template/connection_template
+{
+  "index_patterns": ["connection*"],
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "delete-1-hour"
+    }
+  }
+}
+
