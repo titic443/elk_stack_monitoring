@@ -48,6 +48,44 @@ Menu > Stack Management > Index Management > Data > Index Management
 
 ![1714784223452](image/README/1714784223452.png)
 
+##### 2.2 Consume from beat
+
+**format message**
+
+{"level":"**logLevel**","timestamp":"**2024-05-06T03:55:43.944Z**","caller":"**logs/logs.go:46**","msg":"{\"NameService\":\"**NameService**\",\"Data\":" **logMessage**"}
+
+**_PS, See stap to set up apm agent step5_**
+
+---
+
+**revise setting from logstash.conf**
+
+uncomment **beat{...}** to enable receive data from filebeat
+
+![1714967556954](image/README/1714967556954.png)
+
+---
+
+You can custom field to show on Kibana
+
+mutate {
+
+    add_field => {"**customField**" => "**FieldtoMap**"}
+
+}
+
+![1714969136040](image/README/1714969136040.png)
+
+---
+
+set if condition to specific containerName before send data to Kibana
+
+output:
+
+    [type] == "**containerName**"
+
+![1714969183802](image/README/1714969183802.png)
+
 #### step3: Configure on Kibana
 
 ##### 3.1 Set data view
@@ -116,7 +154,7 @@ Actions > Webhook
 
 ![1714790410843](image/README/1714790410843.png)
 
-#### 4. Configure APM
+#### step4: Configure APM
 
 Menu > Management > Fleet > Setting
 
@@ -154,6 +192,19 @@ Then service which connect to fleet server will appear
 Menu > Observability > APM
 
 ![1714791382040](image/README/1714791382040.png)
+
+#### step5: Setup APM agent on golang
+
+set these variable
+
+![1714985097876](image/README/1714985097876.png)
+
+create adapter for apm repo
+![1714985422711](image/README/1714985422711.png)
+
+Handling http request/response and capture error
+
+![1714985502936](image/README/1714985502936.png)
 
 #### Uninstall
 
