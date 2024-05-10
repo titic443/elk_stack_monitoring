@@ -20,3 +20,15 @@ PUT /_index_template/connection_template
   }
 }
 
+#Text Search
+GET connections_textsearch_2024.05.131/_search
+{
+  "query": {
+    "match": {
+      "name": {
+        "query": "สวนนสประดิพัทธ์",
+        "fuzziness": 2
+      }
+    }
+  }
+}
