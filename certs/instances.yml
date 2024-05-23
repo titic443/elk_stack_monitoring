@@ -1,0 +1,25 @@
+instances:
+   - name: es01
+     dns:
+       - es01
+       - localhost
+     ip:
+       - 127.0.0.1
+       - 10.148.0.2
+       - 35.240.182.179
+   - name: kibana
+     dns:
+       - kibana
+       - localhost
+     ip:
+       - 127.0.0.1
+       - 10.148.0.2
+       - 35.240.182.179
+   - name: fleet-server
+     dns:
+       - fleet-server
+       - localhost
+     ip:
+       - 127.0.0.1
+       - 10.148.0.2
+       - 35.240.182.179
