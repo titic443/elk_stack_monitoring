@@ -96,7 +96,7 @@ services:
       co.elastic.logs/module: elasticsearch
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-      - /home/share/esdata01:/usr/share/elasticsearch/data
+      - ./esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     environment:
@@ -144,7 +144,7 @@ services:
       co.elastic.logs/module: kibana
     volumes:
       - certs:/usr/share/kibana/config/certs
-      - /home/share/kibanadata:/usr/share/kibana/data
+      - ./kibanadata:/usr/share/kibana/data
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     ports:
       - ${KIBANA_PORT}:5601
@@ -188,7 +188,7 @@ services:
     user: root
     volumes:
       - certs:/usr/share/metricbeat/certs
-      -  /home/share/metricbeatdata01:/usr/share/metricbeat/data
+      - ./metricbeatdata01:/usr/share/metricbeat/data
       - "./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
@@ -205,8 +205,7 @@ services:
       - ES_KEY=certs/es01/es01.key
       - KB_CERT=certs/kibana/kibana.crt
       - KB_KEY=certs/kibana/kibana.key
-    command:
-      -strict.perms=false
+    command: -strict.perms=false
 
   filebeat01:
     depends_on:
@@ -216,7 +215,7 @@ services:
     user: root
     volumes:
       - certs:/usr/share/filebeat/certs
-      - /home/share/filebeatdata01:/usr/share/filebeat/data
+      - ./filebeatdata01:/usr/share/filebeat/data
       - "./filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
       - "./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
@@ -228,8 +227,7 @@ services:
       - KIBANA_HOSTS=https://kibana:5601
       - LOGSTASH_HOSTS=http://logstash01:9600
       - CA_CERT=certs/ca/ca.crt
-    command:
-      -strict.perms=false
+    command: -strict.perms=false
     logging:
       options:
         max-size: "10m"
@@ -247,7 +245,7 @@ services:
     user: root
     volumes:
       - certs:/usr/share/logstash/certs
-      - /home/share/logstashdata01:/usr/share/logstash/data
+      - ./logstashdata01:/usr/share/logstash/data
       - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
       - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
     environment:
@@ -302,4 +300,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
