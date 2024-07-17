@@ -1,8 +1,8 @@
-filebeat.inputs:
-- type: filestream
-  id: default-filestream
-  paths:
-    - ingest_data/*.log
+
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
 
 filebeat.autodiscover:
   providers:
@@ -10,17 +10,55 @@ filebeat.autodiscover:
       hints.enabled: true
 
 processors:
-- add_docker_metadata: ~
+  - drop_event.when.contains.container.image.name: docker.elastic.co/kibana/kibana:8.8.2
+  - drop_event.when.contains.container.image.name: docker.elastic.co/beats/elastic-agent
+  - drop_event.when.contains.container.image.name: docker.elastic.co/beats/filebeat
+  - drop_event.when.contains.container.image.name: docker.elastic.co/beats/metricbeat
+  - drop_event.when.contains.container.image.name: docker.elastic.co/logstash/logstash
+  - drop_event.when.contains.container.image.name: docker.elastic.co/elasticsearch/elasticsearch
+  - drop_event.when.contains.container.image.name: rabbit
+  - drop_event.when.contains.container.image.name: nginx
+  - drop_event.when.contains.container.image.name: registry.gitlab.com/ea-dev/tsb-gps-api
+  - drop_event.when.contains.container.image.name: portainer/portainer-ce
+  - drop_event.when.contains.container.image.name: portainer/agent
 
-setup.kibana:
-  host: ${KIBANA_HOSTS}
-  username: ${ELASTIC_USER}
-  password: ${ELASTIC_PASSWORD} 
+# filebeat.inputs:
+# - type: filestream
+#   id: docker-logs
+#   paths:
+#     - /var/lib/docker/containers/*/*-json.log
 
-output.elasticsearch:
-  hosts: ${ELASTIC_HOSTS}
-  username: ${ELASTIC_USER}
-  password: ${ELASTIC_PASSWORD}
-  ssl:
-    enabled: true
-    certificate_authorities: ${CA_CERT}
+
+# filebeat.autodiscover:
+#   providers:
+#     - type: docker
+#       templates:
+#         - condition:
+#             contains:
+#               docker.container.image: "titich/go_line"
+          # config:
+          #   - type: docker
+          #     containers.ids:
+          #       - "${data.docker.container.id}"
+          #     fields_under_root: true
+          #     processors:
+          #       - decode_json_fields:
+          #           fields: ["message"]  # Specify the field containing JSON logs
+          #           target: "json"       # Store the decoded JSON in a field named "json"
+          #           overwrite_keys: true # Overwrite existing keys if necessary
+          #     multiline:
+          #       negate: true
+          #       pattern: '^\d{2}.\d{2}.\d{4} \d{2}:\d{2}:\d{2}.\d{3}'
+          #       match: after
+
+output.logstash:
+  hosts: 'logstash01:5044'
+
+# output.elasticsearch:
+#   hosts: ${ELASTIC_HOSTS}
+#   username: ${ELASTIC_USER}
+#   password: ${ELASTIC_PASSWORD}
+#   ssl:
+#     enabled: true
+#     certificate_authorities: ${CA_CERT}
+

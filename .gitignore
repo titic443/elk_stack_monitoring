@@ -10,3 +10,10 @@ base-arch.excalidraw
 ./smart-fleet-system/
 /apm-example
 /volume
+/esdata01
+/filebeat_ingest_data
+/filebeatdata01
+/kibanadata
+/logstash_ingest_data
+/logstashdata01
+/metricbeatdata01
