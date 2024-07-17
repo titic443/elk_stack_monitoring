@@ -35,6 +35,10 @@ services:
           echo "Set the KIBANA_PASSWORD environment variable in the .env file";
           exit 1;
         fi;
+        if [  -f config/certs/ca.zip ]; then
+          echo "Found and Remove";
+          rm -rf config/certs/*
+        fi;
         if [ ! -f config/certs/ca.zip ]; then
           echo "Creating CA";
           bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
@@ -50,6 +54,7 @@ services:
           "      - localhost\n"\
           "    ip:\n"\
           "      - 127.0.0.1\n"\
+          "      - 172.11.11.13\n"\
           "  - name: kibana\n"\
           "    dns:\n"\
           "      - kibana\n"\
@@ -91,7 +96,7 @@ services:
       co.elastic.logs/module: elasticsearch
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-      - esdata01:/usr/share/elasticsearch/data
+      - /home/share/esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     environment:
@@ -125,6 +130,10 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   kibana:
     depends_on:
@@ -135,7 +144,7 @@ services:
       co.elastic.logs/module: kibana
     volumes:
       - certs:/usr/share/kibana/config/certs
-      - kibanadata:/usr/share/kibana/data
+      - /home/share/kibanadata:/usr/share/kibana/data
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     ports:
       - ${KIBANA_PORT}:5601
@@ -164,36 +173,40 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  # metricbeat01:
-  #   depends_on:
-  #     es01:
-  #       condition: service_healthy
-  #     kibana:
-  #       condition: service_healthy
-  #   image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
-  #   user: root
-  #   volumes:
-  #     - certs:/usr/share/metricbeat/certs
-  #     - metricbeatdata01:/usr/share/metricbeat/data
-  #     - "./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
-  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
-  #     - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
-  #     - "/proc:/hostfs/proc:ro"
-  #     - "/:/hostfs:ro"
-  #   environment:
-  #     - ELASTIC_USER=elastic
-  #     - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-  #     - ELASTIC_HOSTS=https://es01:9200
-  #     - KIBANA_HOSTS=https://kibana:5601
-  #     - LOGSTASH_HOSTS=http://logstash01:9600
-  #     - CA_CERT=certs/ca/ca.crt
-  #     - ES_CERT=certs/es01/es01.crt
-  #     - ES_KEY=certs/es01/es01.key
-  #     - KB_CERT=certs/kibana/kibana.crt
-  #     - KB_KEY=certs/kibana/kibana.key
-  #   command:
-  #     -strict.perms=false
+  metricbeat01:
+    depends_on:
+      es01:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
+    user: root
+    volumes:
+      - certs:/usr/share/metricbeat/certs
+      -  /home/share/metricbeatdata01:/usr/share/metricbeat/data
+      - "./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOSTS=https://es01:9200
+      - KIBANA_HOSTS=https://kibana:5601
+      - LOGSTASH_HOSTS=http://logstash01:9600
+      - CA_CERT=certs/ca/ca.crt
+      - ES_CERT=certs/es01/es01.crt
+      - ES_KEY=certs/es01/es01.key
+      - KB_CERT=certs/kibana/kibana.crt
+      - KB_KEY=certs/kibana/kibana.key
+    command:
+      -strict.perms=false
 
   filebeat01:
     depends_on:
@@ -203,7 +216,7 @@ services:
     user: root
     volumes:
       - certs:/usr/share/filebeat/certs
-      - filebeatdata01:/usr/share/filebeat/data
+      - /home/share/filebeatdata01:/usr/share/filebeat/data
       - "./filebeat_ingest_data/:/usr/share/filebeat/ingest_data/"
       - "./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro"
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
@@ -215,7 +228,12 @@ services:
       - KIBANA_HOSTS=https://kibana:5601
       - LOGSTASH_HOSTS=http://logstash01:9600
       - CA_CERT=certs/ca/ca.crt
-    command: -strict.perms=false
+    command:
+      -strict.perms=false
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   logstash01:
     depends_on:
@@ -229,7 +247,7 @@ services:
     user: root
     volumes:
       - certs:/usr/share/logstash/certs
-      - logstashdata01:/usr/share/logstash/data
+      - /home/share/logstashdata01:/usr/share/logstash/data
       - "./logstash_ingest_data/:/usr/share/logstash/ingest_data/"
       - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
     environment:
@@ -237,6 +255,11 @@ services:
       - ELASTIC_USER=elastic
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ELASTIC_HOSTS=https://es01:9200
+    mem_limit: ${LS_MEM_LIMIT}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   fleet-server:
     depends_on:
@@ -275,3 +298,8 @@ services:
       - KIBANA_FLEET_USERNAME=elastic
       - KIBANA_FLEET_PASSWORD=${ELASTIC_PASSWORD}
       - KIBANA_HOST=https://kibana:5601
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
